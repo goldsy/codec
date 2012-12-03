@@ -2,13 +2,13 @@
 public class RSA {
     /**
      * 
-     * @param baseValue
+     * @param message
      * This is the value that will be raised to some power then mod'ed.
      * 
-     * @param power
+     * @param exponent
      * This is the power by which the base value will be raised.
      * 
-     * @param modBy
+     * @param modulus
      * This is the value to mod the result of the power.
      * 
      * @return
@@ -16,9 +16,10 @@ public class RSA {
      * power and mod'ed by the mod by value as a string representation of the
      * bits.
      */
-	public static String crypto(String baseValue, String power, String modBy) {
+	public static String crypto(String message, String exponent, String modulus) {
         String returnValue = "";
         
 		return returnValue;
 	}
+    
 }
