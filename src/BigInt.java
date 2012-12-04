@@ -264,7 +264,45 @@ public class BigInt {
         
         // Now account for the carry flag from the borrow and carry for any
         // remaining 2s.
+        for (int index = 0; index < result.size(); ++index) {
+        	if (carryFlag) {
+        		if (result.getBit(index) == 0) {
+                    // Add 1 to the bit.
+        			result.setBit(index, 1);
+                    
+        			// Reset the carry flag.
+        			carryFlag = false;
+        		}
+        		else if (result.getBit(index) == 1) {
+        			// Set the result bit to zero and keep the carry.
+                    result.setBit(index, 0);
+        		}
+        		else {
+        			// The value must have been a 2 so set the value to 1 and
+        			// keep the carry.
+                    result.setBit(index, 1);
+        		}
+        	}
+        	else {
+        		// There is no carry. A two has an implicit carry. The other
+        		// two cases won't change the value.
+                if (result.getBit(index) == 2) {
+                    // A 2 is a binary 10.
+                	result.setBit(index, 0);
+                	
+                	// Set the carry flag.
+                	carryFlag = true;
+                }
+        	}
+        }
+        
+        // TODO: (goldsy) Not sure if we need to but resize the result to the
+        // 		exact size.
+        result.compact();
+        
+        return result;
 	}
+    
     
 	/**
 	 * This method returns the size of the BigInt.
@@ -331,5 +369,38 @@ public class BigInt {
         else {
         	return digits[index];
         }
+	}
+    
+	
+    /**
+     * This method compacts the BigInt by reducing the underlying array by
+     * the size of any most significant zeros. In other words 00111 will be
+     * compacted by 2 resulting in an underlying array of three locations
+     * instead of 5. If the most significant bit is a one then this method
+     * does nothing.
+     */
+	public void compact() {
+        int targetSize = -1;
+        
+        for (int index = (size() - 1); (index > 0) && (targetSize == -1); --index) {
+        	if (getBit(index) == 1) {
+        		targetSize = index + 1;
+        	}
+        }
+        
+        if (targetSize == size()) {
+            // There is nothing to do.
+        	return;
+        }
+        
+        // Create a new array of the new size.
+        int[] temp = new int[targetSize];
+        
+        // Copy the bits from the original into this one.
+        for (int index = 0; index < targetSize; ++index) {
+        	temp[index] = digits[index];
+        }
+        
+        digits = temp;
 	}
 }
