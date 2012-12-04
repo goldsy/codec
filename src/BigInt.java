@@ -116,7 +116,7 @@ public class BigInt {
 					}
 
 					// Finally set the result to the temp.
-					result.set(temp);
+					result.setArray(temp);
 				}
 			}
 			// Check if the index has gone beyond the last bit of the lValue.
@@ -321,7 +321,7 @@ public class BigInt {
      * @return
      * This method returns a reference to the internal bit array.
      */
-	public int[] get() {
+	public int[] getArray() {
 		return digits;
 	}
     
@@ -332,7 +332,7 @@ public class BigInt {
      * @param source
      * This source arrays to get the digits array to.
      */
-	public void set(int[] source) {
+	public void setArray(int[] source) {
 		digits = source;
 	}
 	
