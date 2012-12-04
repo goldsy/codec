@@ -224,8 +224,9 @@ public class BigInt {
         
         int maxIndex = -1;
         
-        // We can only check the lValue because we know that the lValue must
-		// be greater than the rValue.
+        // We only have to check the lValue because we know that the lValue must
+		// be greater than the rValue. We won't have negatives in our 
+        // implementation.
 		for (int index = 0; index < size(); ++index) {
 			if (getBit(index) == 1 && rValue.getBit(index) == 0) {
 				maxIndex = index;
@@ -234,9 +235,35 @@ public class BigInt {
         
         // Check if that case doesn't exist.
 		if (maxIndex == -1) {
+            // TODO: (goldsy) REMOVE AFTER TESTING.
+            System.out.println("HOLD IT! WE GOT TWO NUMBERS THAT WILL RESULT IN A NEGATIVE OR ZERO (WHICH WE MIGHT HAVE).");
             // All bits must be considered.
 			maxIndex = size() - 1;
 		}
+        
+        // The result will never be any more than the largest value.
+		BigInt result = new BigInt(Math.max(size(), rValue.size()));
+        
+		// Now that we found that bit. Borrow from it... Set maxIndex bit to 0.
+        setBit(maxIndex, 0);
+        
+		// Add 1 to every bit less than maxIndex.
+        for (int index = 0; index < maxIndex; ++index) {
+        	// Note: Add 1 to bits that are already 1 will result in an int of 2
+        	//		which isn't binary, but this is a non-std subtraction algorithm.
+        	digits[index] += 1;
+        }
+        
+        // Set the carry bit flag.
+        boolean carryFlag = true;
+        
+        // Do subtraction.
+        for (int index = 0; index < size(); ++index) {
+        	result.setBit(index, (digits[index] - rValue.getBit(index)));
+        }
+        
+        // Now account for the carry flag from the borrow and carry for any
+        // remaining 2s.
 	}
     
 	/**
@@ -297,6 +324,12 @@ public class BigInt {
      * index.
      */
 	public int getBit(int index) {
-		return digits[index];
+        // Any value more significant than size() has to be zero.
+        if (index > (size() - 1)) {
+        	return 0;
+        }
+        else {
+        	return digits[index];
+        }
 	}
 }
