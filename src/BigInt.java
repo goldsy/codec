@@ -218,6 +218,17 @@ public class BigInt {
 		return result;
 	}
     
+    
+	/**
+	 * This is the subtract method. It subtracts the right value from this
+	 * BigInt which is the left value.
+     * 
+	 * @param rValue
+     * The right value in the equation.
+     * 
+	 * @return
+     * This method returns the result of the subtraction.
+	 */
 	public BigInt subtract(BigInt rValue) { 
         // Find the most significant digit where the lValue is 1 and rValue
 		// is 0.
@@ -301,6 +312,23 @@ public class BigInt {
         result.compact();
         
         return result;
+	}
+    
+	
+    /**
+     * This method returns the product of this BigInt with the right value.
+     * 
+     * @param rValue
+     * The right value of the multiplication equation.
+     * 
+     * @return
+     * This method returns the product of the multiplication.
+     */
+	public BigInt multiply(BigInt rValue) {
+        // The accumulator needs to be the size of the product of the size of
+		// the two numbers.
+		// TODO: (goldsy) NEED TO REWRITE THE ADD TO HANDLE PASSING THE ACCUMULATOR. NO MEMORY REALLOCATION.
+		BigInt accumulator = new BigInt(size() * rValue.size());
 	}
     
     
