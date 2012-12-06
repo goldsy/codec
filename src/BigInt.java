@@ -8,7 +8,8 @@ public class BigInt {
     // Data members
 	int[] digits;
     
-	// Positive shift indicates a reduce, a negative shift indicates a shift.
+	// Positive shifts indicates a reduce, a negative shifts value indicates 
+	// a shift.
 	int shifts = 0;
 	
     /**
@@ -58,6 +59,23 @@ public class BigInt {
         // Init the digits array with zeros.
         for (int i = 0; i < digits.length; ++i) {
         	digits[i] = 0;
+        }
+    }
+    
+    
+    /**
+     * This is the class copy constructor. This method will deep copy the 
+     * underlying array.
+     * 
+     * @param source
+     * Source big int to copy.
+     */
+    public BigInt(BigInt source) {
+        digits = new int[source.size()];
+        
+        // Deep copy the big int.
+        for (int index = 0; index < size(); ++index) {
+        	digits[index] = source.getBit(index);
         }
     }
 
@@ -404,6 +422,15 @@ public class BigInt {
      * This method returns the result of the subtraction.
 	 */
 	public BigInt subtract(BigInt rValue) { 
+        // DEBUG
+		//System.out.println("lValue: " + toString());
+		//System.out.println("rValue: " + rValue.toString());
+        
+        // Since this changes the lValue we have to make a copy to preserve
+		// it's original value.  This probably screws the value of the non-
+		// standard subtract presented in class.
+		BigInt tempLValue = new BigInt(this);
+		
         // Find the most significant digit where the lValue is 1 and rValue
 		// is 0.
         
@@ -412,8 +439,8 @@ public class BigInt {
         // We only have to check the lValue because we know that the lValue must
 		// be greater than the rValue. We won't have negatives in our 
         // implementation.
-		for (int index = 0; index < size(); ++index) {
-			if (getBit(index) == 1 && rValue.getBit(index) == 0) {
+		for (int index = 0; index < tempLValue.size(); ++index) {
+			if (tempLValue.getBit(index) == 1 && rValue.getBit(index) == 0) {
 				maxIndex = index;
 			}
 		}
@@ -422,29 +449,30 @@ public class BigInt {
 		if (maxIndex == -1) {
             // TODO: (goldsy) REMOVE AFTER TESTING.
             System.out.println("HOLD IT! WE GOT TWO NUMBERS THAT WILL RESULT IN A NEGATIVE OR ZERO (WHICH WE MIGHT HAVE).");
+            
             // All bits must be considered.
-			maxIndex = size() - 1;
+			maxIndex = tempLValue.size() - 1;
 		}
         
         // The result will never be any more than the largest value.
-		BigInt result = new BigInt(Math.max(size(), rValue.size()));
+		BigInt result = new BigInt(Math.max(tempLValue.size(), rValue.size()));
         
 		// Now that we found that bit. Borrow from it... Set maxIndex bit to 0.
-        setBit(maxIndex, 0);
+        tempLValue.setBit(maxIndex, 0);
         
 		// Add 1 to every bit less than maxIndex.
         for (int index = 0; index < maxIndex; ++index) {
         	// Note: Add 1 to bits that are already 1 will result in an int of 2
         	//		which isn't binary, but this is a non-std subtraction algorithm.
-        	digits[index] += 1;
+        	tempLValue.digits[index] += 1;
         }
         
         // Set the carry bit flag.
         boolean carryFlag = true;
         
         // Do subtraction.
-        for (int index = 0; index < size(); ++index) {
-        	result.setBit(index, (digits[index] - rValue.getBit(index)));
+        for (int index = 0; index < tempLValue.size(); ++index) {
+        	result.setBit(index, (tempLValue.digits[index] - rValue.getBit(index)));
         }
         
         // Now account for the carry flag from the borrow and carry for any
@@ -499,9 +527,8 @@ public class BigInt {
      * This method returns the product of the multiplication.
      */
 	public BigInt multiply(BigInt rValue) {
-        // The accumulator needs to be the size of the product of the size of
+        // The accumulator needs to be the size of the sum of the size of
 		// the two numbers.
-		// TODO: (goldsy) NEED TO REWRITE THE ADD TO HANDLE PASSING THE ACCUMULATOR. NO MEMORY REALLOCATION.
 		BigInt accumulator = new BigInt(size() + rValue.size());
         
         // Break up rValue into linear combination and add the shifted lValue
@@ -525,19 +552,105 @@ public class BigInt {
 	}
     
 	
-	private BigInt mod(String modulus) {
+    /**
+     * This method calculates the modulus of this big int.
+     * 
+     * @param modulus
+     * The modulus to use.
+     * 
+     * @return
+     * This method returns the modulus of this BigInt.
+     */
+	public BigInt mod(BigInt modulus) {
+        // Pre-compute the modulus of the power of two to numBits.
 		int numBits = size();
 		
-		int precomputed[] = new int[numBits - 1];
-	}
-    
-	
-	public BigInt powMod(String exponent, String modulus) {
+		BigInt precomputed[] = new BigInt[numBits];
+        
+        // Since mod'ing by 0 or 1 makes no sense (the former being undefined)
+		// it can be safely assumed that 2^0 mod(x) = 1.
+        precomputed[0] = new BigInt("1");
+        
+        for (int index = 1; index < numBits; ++index) {
+            // Set the next one equal to this one.
+        	precomputed[index] = new BigInt(precomputed[index - 1]);
+            
+        	// Double it's value.
+            precomputed[index].shift();
+            
+            // DEBUG
+            //System.out.println("After shifting: " + precomputed[index].toString());
+        	
+            // If the value is greater or = to the modulus subtract it out.
+            if (precomputed[index].isGreaterOrEquals(modulus)) {
+                // DEBUG
+            	//System.out.println("This value [" + toString() + "] is greater than modulus [" + modulus + "]");
+            	precomputed[index] = precomputed[index].subtract(modulus);
+            }
+        }
+        
+        // DEBUG
+        //System.out.println("FINISHED PRECOMPUTING VALUES.");
 		
+        // The accumulator will never be larger than size of mod + 1.
+        BigInt accumulator = new BigInt(modulus.size() + 1);
+        
+        // Loop through all of the bits of this number.  Only add in the
+        // remainders when the bit we are looking at is a 1.
+        for (int index = 0; index < size(); ++index) {
+        	if (getBit(index) == 1) {
+        		accumulator.add(precomputed[index]);
+                
+                // Mod the result.
+        		// Check if the addition pushed us over modulus. If so then
+        		// subtract it.
+                if (accumulator.isGreaterOrEquals(modulus)) {
+                	accumulator = accumulator.subtract(modulus);
+                }
+        	}
+        }
+        
+        return accumulator;
+	}
+    
+    
+	
+//	private precomputeMods()
+	
+    /**
+     * Convenience function to create the accumulator for the modular 
+     * exponentiation function.
+     * 
+     * @param exponent
+     * Power to raise this BigInt by.
+     * 
+     * @param modulus
+     * The modulus value.
+     * 
+     * @return
+     * This function returns the the modulus of this big int rasied to power 
+     * exponent.
+     */
+	public BigInt powMod(BigInt exponent, BigInt modulus) {
+		BigInt accumulator = new BigInt(modulus.size());
+        
+        // This method returns a reference to the accumulator passed in the
+		// parameters.
+		return powMod(exponent, modulus, accumulator);
 	}
     
 	
-	private precomputeMods()
+    /**
+     * 
+     * @param exponent
+     * @param modulus
+     * @param accumulator
+     * @return
+     */
+	private BigInt powMod(BigInt exponent, BigInt modulus, BigInt accumulator) {
+        
+		return accumulator;
+	}
     
     
 	/**
@@ -551,6 +664,68 @@ public class BigInt {
 		// we added digits by adding least signification bits. The least
 		// significant bit is initially at the zero index in the array.
 		return (digits.length - shifts);
+	}
+    
+	
+    /**
+     * This method logically shifts the value of this big int.
+     */
+	public void shift() {
+        // Since index 0 is least significant bit, we need to subtract to shift.
+		--shifts;
+	}
+    
+	
+    /**
+     * This method logically reduces the value of this big int.
+     */
+	public void reduce() {
+        // Since index 0 is least significant bit, we need to add to reduce.
+        // The effect is ignoring the actual low order bit(s).
+		++shifts;
+	}
+    
+	
+    /**
+     * This method returns whether this Big Int is odd or not.
+     * 
+     * @return
+     * This method returns true if the logically least significant bit is odd.
+     */
+	public boolean isOdd() {
+		if (digits[adjustedIndex(0)] == 1) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+    
+	
+    /**
+     * This method determines if this BigInt is greater than or equals the
+     * specified Big Int.
+     * 
+     * @param rValue
+     * The right term.
+     * 
+     * @return
+     * This method returns true if this Big Int is greater or equal in value
+     * and false otherwise. */
+	public boolean isGreaterOrEquals(BigInt rValue) {
+		// It's more likely that the value will be greater or less than so
+		// check that first. Start at high bits and look for first difference.
+        for(int index = Math.max(size(), rValue.size()); index >= 0; --index) {
+        	if (getBit(index) > rValue.getBit(index)) {
+        		return true;
+        	}
+        	else if (getBit(index) < rValue.getBit(index)) {
+        		return false;
+        	}
+        }
+        
+        // If we made it through all of the bits, then they are the same.
+        return true;
 	}
 	
 	
@@ -665,9 +840,9 @@ public class BigInt {
         StringBuilder temp = new StringBuilder(size());
         
 		for (int i = (size() - 1); i >= 0; --i) {
-			temp.append(digits[i]);
+			temp.append(getBit(i));
 		}
         
-		return temp.toString();
+		return (temp.toString() /*+ " Shift Value: " + shifts + " Size: " + size()*/);
 	}
 }
