@@ -84,11 +84,17 @@ public class BigInt {
      * @param rValue
      * The right value in the addition.
      * 
+     * @param result
+     * The container in which to place the result.  This may already have a
+     * value, such as an accumulator.
+     * 
      * @return
      * This method returns a BigInt representing the sum of the two BigInts.
      */
-	public BigInt add(BigInt rValue) {
-		BigInt result = new BigInt(Math.max(size(), rValue.size()) + 1);
+	public BigInt add(BigInt rValue, BigInt result) {
+        if (result == null) {
+        	result = new BigInt(Math.max(size(), rValue.size()) + 1);
+        }
         
 		boolean activeCarry = false;
         
