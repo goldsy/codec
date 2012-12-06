@@ -75,9 +75,17 @@ public class TestRSA {
         System.out.println();
         
         System.out.println("Mod " + bi1.toString() + " mod " + bi2.toString());
+        bi1.precomputeMods(bi2);
         result = bi1.mod(bi2);
         System.out.println(result.toString());
         System.out.println();
+        
+        System.out.println("FULL CRYPTO TEST");
+        String myA = "1011";
+        String myB = "10";
+        String myC = "110";
+        
+        System.out.println("  I say a^b mod c = " + RSA.crypto(myA,myB,myC));
         
         System.out.println("TEST THE FUNCTIONS");
         System.out.println("TEST THE FUNCTIONS");
@@ -87,6 +95,8 @@ public class TestRSA {
         System.out.println("TEST THE FUNCTIONS");
         System.out.println("TEST THE FUNCTIONS");
         System.out.println("TEST THE FUNCTIONS");
+        // REMOVE AFTER TESTING.
+        System.exit(0);
 
         System.out.println("COMPARE TO JAVA'S BIGINTEGER METHODS:");
 

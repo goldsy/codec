@@ -11,7 +11,11 @@ public class BigInt {
 	// Positive shifts indicates a reduce, a negative shifts value indicates 
 	// a shift.
 	int shifts = 0;
+    
+	// Array of precomputed modulus powers of two.
+	BigInt precomputed[] = null;
 	
+    
     /**
      * This ctor constructs a BigInt from the source string. The size of the
      * resulting BigInt is the length of the source string. A precondition
@@ -120,7 +124,7 @@ public class BigInt {
         if (rValue.size() > size()) {
         	System.out.println("Possible buffer overflow. This BigInt must"
         			+ " be larger in size than the value being added in.");
-            System.exit(1);
+            throw new RuntimeException();
         }
         
 		boolean activeCarry = false;
@@ -527,9 +531,16 @@ public class BigInt {
      * This method returns the product of the multiplication.
      */
 	public BigInt multiply(BigInt rValue) {
+        // So the shifts don't go crazy, if lValue and rValue point to the same
+		// object make a copy.
+        if (this == rValue) {
+        	rValue = new BigInt(this);
+        }
+        
         // The accumulator needs to be the size of the sum of the size of
 		// the two numbers.
 		BigInt accumulator = new BigInt(size() + rValue.size());
+        int shiftCount = 0;
         
         // Break up rValue into linear combination and add the shifted lValue
 		// pieces into the accumulator.
@@ -543,10 +554,11 @@ public class BigInt {
         	// Shift the lValue. Shifted after the first add because lValue is
         	// already 2^0.
         	shifts -= 1;
+            ++shiftCount;
         }
         
         // After multiple restore the shift value to zero.
-        shifts = 0;
+        shifts += shiftCount;
 		
 		return accumulator;
 	}
@@ -562,36 +574,6 @@ public class BigInt {
      * This method returns the modulus of this BigInt.
      */
 	public BigInt mod(BigInt modulus) {
-        // Pre-compute the modulus of the power of two to numBits.
-		int numBits = size();
-		
-		BigInt precomputed[] = new BigInt[numBits];
-        
-        // Since mod'ing by 0 or 1 makes no sense (the former being undefined)
-		// it can be safely assumed that 2^0 mod(x) = 1.
-        precomputed[0] = new BigInt("1");
-        
-        for (int index = 1; index < numBits; ++index) {
-            // Set the next one equal to this one.
-        	precomputed[index] = new BigInt(precomputed[index - 1]);
-            
-        	// Double it's value.
-            precomputed[index].shift();
-            
-            // DEBUG
-            //System.out.println("After shifting: " + precomputed[index].toString());
-        	
-            // If the value is greater or = to the modulus subtract it out.
-            if (precomputed[index].isGreaterOrEquals(modulus)) {
-                // DEBUG
-            	//System.out.println("This value [" + toString() + "] is greater than modulus [" + modulus + "]");
-            	precomputed[index] = precomputed[index].subtract(modulus);
-            }
-        }
-        
-        // DEBUG
-        //System.out.println("FINISHED PRECOMPUTING VALUES.");
-		
         // The accumulator will never be larger than size of mod + 1.
         BigInt accumulator = new BigInt(modulus.size() + 1);
         
@@ -610,12 +592,50 @@ public class BigInt {
         	}
         }
         
+        accumulator.compact();
+        
         return accumulator;
 	}
     
     
+	/**
+	 * This method precomputes the mods for the powers of two.
+     * 
+	 * @param modulus
+     * The modulus to use for the precomputed values.
+	 */
+	public void precomputeMods(BigInt modulus) {
+		// Pre-compute the modulus of the power of two to numBits.
+		int numBits = size();
+
+		precomputed = new BigInt[numBits];
+
+		// Since mod'ing by 0 or 1 makes no sense (the former being undefined)
+		// it can be safely assumed that 2^0 mod(x) = 1.
+		precomputed[0] = new BigInt("1");
+
+		for (int index = 1; index < numBits; ++index) {
+			// Set the next one equal to this one.
+			precomputed[index] = new BigInt(precomputed[index - 1]);
+
+			// Double it's value.
+			precomputed[index].shift();
+
+			// DEBUG
+			//System.out.println("After shifting: " + precomputed[index].toString());
+
+			// If the value is greater or = to the modulus subtract it out.
+			if (precomputed[index].isGreaterOrEquals(modulus)) {
+				// DEBUG
+				//System.out.println("This value [" + toString() + "] is greater than modulus [" + modulus + "]");
+				precomputed[index] = precomputed[index].subtract(modulus);
+			}
+		}
+
+		// DEBUG
+		//System.out.println("FINISHED PRECOMPUTING VALUES.");
+	}
 	
-//	private precomputeMods()
 	
     /**
      * Convenience function to create the accumulator for the modular 
@@ -632,6 +652,8 @@ public class BigInt {
      * exponent.
      */
 	public BigInt powMod(BigInt exponent, BigInt modulus) {
+        precomputeMods(modulus);
+        
 		BigInt accumulator = new BigInt(modulus.size());
         
         // This method returns a reference to the accumulator passed in the
@@ -648,8 +670,51 @@ public class BigInt {
      * @return
      */
 	private BigInt powMod(BigInt exponent, BigInt modulus, BigInt accumulator) {
+        // DEBUG
+		System.out.println("Exponent value: " + exponent.toString() + " Size: " + exponent.size());
+		
+        // Just make sure there are no leading zeros. This only costs a 
+		// function call if a resize isn't necessary.
+        exponent.compact();
         
-		return accumulator;
+        if (exponent.toString().equals("1")) {
+            // a (mod m)
+            BigInt temp = mod(modulus);
+            
+        	// DEBUG
+        	System.out.println("Finished mod'ing exponent:" + exponent.toString() + " temp: " + temp.toString());
+            
+        	return temp;
+        }
+        else if (exponent.isOdd()) {
+            // [a (mod m)]*[a^(b/2)(mod m)]^2(mod m)
+        	BigInt lValue = mod(modulus);
+            
+        	// Divide the exponent.
+            exponent.reduce();
+            
+            // Call powMod() again.
+        	BigInt rValue = powMod(exponent, modulus, accumulator);
+            
+        	// Square the resulting value.
+            rValue = rValue.multiply(rValue);
+            
+            // Multiply the lValue and rValue together, mod() it and return the value.
+            return lValue.multiply(rValue).mod(modulus);
+        }
+        else {
+        	// The exponent is even.
+            // [a^(b/2)(mod m)]^2(mod m)
+            
+        	// Divide the exponent.
+            exponent.reduce();
+            
+            // Call powMod() again.
+        	BigInt rValue = powMod(exponent, modulus, accumulator);
+            
+        	// Square the resulting value, mod it and return the value.
+            return rValue.multiply(rValue).mod(modulus);
+        }
 	}
     
     
@@ -811,6 +876,11 @@ public class BigInt {
      * does nothing.
      */
 	public void compact() {
+        if (size() == 1) {
+        	// Already as small as we can get. Nothing to do.
+            return;
+        }
+        
         int targetSize = -1;
         
         for (int index = (size() - 1); (index > 0) && (targetSize == -1); --index) {
@@ -822,6 +892,11 @@ public class BigInt {
         if (targetSize == size()) {
             // There is nothing to do.
         	return;
+        }
+        
+        // All bits are zero.  Reduce to size 1.
+        if (targetSize == -1) {
+            targetSize = 1;
         }
         
         // Create a new array of the new size.
