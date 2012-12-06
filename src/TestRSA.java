@@ -45,6 +45,39 @@ public class TestRSA {
         // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        System.out.println("TEST THE ADD");
+        System.out.println("TEST THE ADD");
+        System.out.println("TEST THE ADD");
+        System.out.println("TEST THE ADD");
+        System.out.println("TEST THE ADD");
+        System.out.println("TEST THE ADD");
+        System.out.println("TEST THE ADD");
+        System.out.println("TEST THE ADD");
+        
+        BigInt bi1 = new BigInt("1111");
+        BigInt bi2 = new BigInt("11");
+        
+        System.out.println("Adding " + bi1.toString() + " + " + bi2.toString());
+        
+        BigInt result = bi1.basicAdd(bi2, null);
+        result.compact();
+        
+        System.out.println(result.toString());
+        
+        System.out.println("Multiplying " + bi1.toString() + " x " + bi2.toString());
+        
+        result = bi1.multiply(bi2);
+        
+        System.out.println(result.toString());
+        
+        System.out.println("TEST THE ADD");
+        System.out.println("TEST THE ADD");
+        System.out.println("TEST THE ADD");
+        System.out.println("TEST THE ADD");
+        System.out.println("TEST THE ADD");
+        System.out.println("TEST THE ADD");
+        System.out.println("TEST THE ADD");
+        System.out.println("TEST THE ADD");
 
         System.out.println("COMPARE TO JAVA'S BIGINTEGER METHODS:");
 

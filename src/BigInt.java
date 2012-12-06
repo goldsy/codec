@@ -8,7 +8,7 @@ public class BigInt {
     // Data members
 	int[] digits;
     
-	// Positive shift indicates a shift, a negative shift indicates a reduce.
+	// Positive shift indicates a reduce, a negative shift indicates a shift.
 	int shifts = 0;
 	
     /**
@@ -37,6 +37,9 @@ public class BigInt {
         				+ sourceIndex + " in string: " + source);
                 System.exit(1);
         	}
+            
+        	// Increment the source index.
+        	++sourceIndex;
         }
     }
     
@@ -78,6 +81,171 @@ public class BigInt {
 	
 	
     /**
+     * This method is a unary add that adds the rValue into this BigInt (the 
+     * lValue). It add the bits contained in each big integer.
+     * 
+     * Precondition: The size of this BigInt must be large enough to handle 
+     * having the lValue added into it including the possibility of a final 
+     * carry.
+     * 
+     * @param rValue
+     * The container in which to place the result.  This may already have a
+     * value, such as an accumulator.
+     * 
+     * @return
+     * This method returns a BigInt representing the sum of the two BigInts.
+     */
+	public BigInt add(BigInt rValue) {
+//        if (result == null) {
+//        	result = new BigInt(Math.max(size(), rValue.size()) + 1);
+//        }
+        if (rValue.size() > size()) {
+        	System.out.println("Possible buffer overflow. This BigInt must"
+        			+ " be larger in size than the value being added in.");
+            System.exit(1);
+        }
+        
+		boolean activeCarry = false;
+        
+        // Iterate over all bits of the two numbers, but we need to go one
+		// beyond because there could be one last carry bit.  The for loop
+		// could have checked for <= max(size), but checking for < Max(size)+1
+		// is more intuitive.
+		for (int i = 0; i < (size()); ++i) {
+			// Check if this is the most significant bit iteration.
+			// The lValue is always larger than the rValue and therefore will
+			// never have more than a carry bit added in.
+			if (i == size()) {
+				// Check the carry only.
+				if (activeCarry) {
+                    if (getBit(i) == 1) {
+                        // Uh oh, we got a buffer overflow.
+                        System.out.println("BUFFER OVERFLOW. This BigInt isn't large enough to add in the rValue.");
+                        System.exit(1);
+                    }
+                    
+					// Set the most significant bit to one.
+					setBit(i, 1);
+				}
+				else {
+// TODO: (goldsy) REMOVE AFTER TESTING.
+//					// The most significant bit was not needed.
+//					// Create a new result array with on less bit, copy the
+//					// result bits to the new array and set it in the resulting
+//					// big int.
+//					int[] temp = new int[result.size() - 1];
+//
+//					for (int index = 0; index < temp.length; ++index) {
+//						temp[index] = result.getBit(index);
+//					}
+//
+//					// Finally set the result to the temp.
+//					result.setArray(temp);
+				}
+			}
+            // TODO: (goldsy) REMOVE AFTER TESTING.  The lValue is always larger than the rValue.
+			// Check if the index has gone beyond the last bit of the lValue.
+//			else if (i > (size() - 1)) {
+//				if (rValue.getBit(i) == 1) {
+//					if (activeCarry) {
+//						// Leave the carry active.
+//						result.setBit(i, 0);
+//					}
+//					else {
+//						// Clear the carry active flag.
+//						activeCarry = false;
+//						result.setBit(i, 1);
+//					}
+//				}
+//				// The bit is a zero.
+//				else {
+//					if (activeCarry) {
+//						result.setBit(i, 1);
+//					}
+//					else {
+//						result.setBit(i, 0);
+//					}
+//
+//					// Always clear the carry active flag.
+//					activeCarry = false;
+//				}
+//			}
+			// Check if the index has gone beyond the last bit of the rValue.
+			else if (i > (rValue.size() - 1)) {
+				if (getBit(i) == 1) {
+					if (activeCarry) {
+						// Leave the carry active.
+						setBit(i, 0);
+					}
+					else {
+                        // Leave lValue bit[i] == 1.
+						// Clear the carry active flag.
+						activeCarry = false;
+					}
+				}
+				// The bit is a zero.
+				else {
+					if (activeCarry) {
+						setBit(i, 1);
+					}
+                    
+					// If no carry leave lValue bit[i] == 0.
+
+					// Always clear the carry active flag.
+					activeCarry = false;
+				}
+			}
+			// The two bits from each number plus the potential for a carry
+			// must be accounted for.
+			else {
+				// Check if both the lValue and rValue bits are one.
+				if (getBit(i) + rValue.getBit(i) == 2) {
+					if (activeCarry) {
+						// Leave the carry flag set.
+                        // Leave lValue bit[i] == 1.
+					}
+					else {
+						setBit(i, 0);
+
+						// Set the carry bit flag.
+						activeCarry = true;
+					}
+				}
+				// Check if only one of the lValue or rValue bits are one.
+				else if (getBit(i) + rValue.getBit(i) == 1) {
+					if (activeCarry) {
+						// Leave the carry flag set.
+						// Set the bit to zero. We don't know which is zero.
+						setBit(i, 0);
+					}
+					else {
+						// Leave the carry flag cleared.
+						// Set the bit to zero. We don't know which is 1.
+						setBit(i, 1);
+					}
+				}
+				// Both bits must be zero.
+				else {
+					if (activeCarry) {
+						setBit(i, 1);
+
+						// Clear the carry flag.
+						activeCarry = false;
+					}
+                    
+                    // If there is no active carry:
+					// Leave the carry flag cleared.
+					// Leave the bit lValue[i] == 0.
+				}
+			}
+		}
+    
+		return this;
+	}
+    
+	
+	
+    /**
      * This is the add method for BigInts. It add the bits contained in each
      * big integer.
      * 
@@ -91,7 +259,7 @@ public class BigInt {
      * @return
      * This method returns a BigInt representing the sum of the two BigInts.
      */
-	public BigInt add(BigInt rValue, BigInt result) {
+	public BigInt basicAdd(BigInt rValue, BigInt result) {
         if (result == null) {
         	result = new BigInt(Math.max(size(), rValue.size()) + 1);
         }
@@ -223,7 +391,7 @@ public class BigInt {
     
 		return result;
 	}
-    
+
     
 	/**
 	 * This is the subtract method. It subtracts the right value from this
@@ -334,8 +502,42 @@ public class BigInt {
         // The accumulator needs to be the size of the product of the size of
 		// the two numbers.
 		// TODO: (goldsy) NEED TO REWRITE THE ADD TO HANDLE PASSING THE ACCUMULATOR. NO MEMORY REALLOCATION.
-		BigInt accumulator = new BigInt(size() * rValue.size());
+		BigInt accumulator = new BigInt(size() + rValue.size());
+        
+        // Break up rValue into linear combination and add the shifted lValue
+		// pieces into the accumulator.
+        for (int index = 0; index < rValue.size(); ++index) {
+            // If the rValue bit is 1 add the lValue otherwise 0 x anything =
+        	// zero so skip it.
+        	if (rValue.getBit(index) == 1) {
+        		accumulator.add(this);
+        	}
+            
+        	// Shift the lValue. Shifted after the first add because lValue is
+        	// already 2^0.
+        	shifts -= 1;
+        }
+        
+        // After multiple restore the shift value to zero.
+        shifts = 0;
+		
+		return accumulator;
 	}
+    
+	
+	private BigInt mod(String modulus) {
+		int numBits = size();
+		
+		int precomputed[] = new int[numBits - 1];
+	}
+    
+	
+	public BigInt powMod(String exponent, String modulus) {
+		
+	}
+    
+	
+	private precomputeMods()
     
     
 	/**
@@ -345,7 +547,10 @@ public class BigInt {
      * This method returns the size of this BigInt.
 	 */
 	public int size() {
-		return digits.length;
+        // We need to adjust the size by the shifts. If we did a shift then
+		// we added digits by adding least signification bits. The least
+		// significant bit is initially at the zero index in the array.
+		return (digits.length - shifts);
 	}
 	
 	
@@ -397,12 +602,29 @@ public class BigInt {
      */
 	public int getBit(int index) {
         // Any value more significant than size() has to be zero.
-        if (index > (size() - 1)) {
+        if ((index >= size()) || (adjustedIndex(index) < 0)) {
         	return 0;
         }
         else {
-        	return digits[index];
+        	return digits[adjustedIndex(index)];
         }
+	}
+    
+	
+    /**
+     * This method determines what the actual index is into the underlying 
+     * array.  It is the responsibility of the caller not to access outside the
+     * bounds of the underlying array.
+     * 
+     * @param index
+     * The requested index.
+     * 
+     * @return
+     * This method returns the requested index adjusted by the number of shifts.
+     * 
+     */
+	public int adjustedIndex(int index) {
+		return (index + shifts);
 	}
     
 	
@@ -436,5 +658,16 @@ public class BigInt {
         }
         
         digits = temp;
+	}
+    
+	
+	public String toString() {
+        StringBuilder temp = new StringBuilder(size());
+        
+		for (int i = (size() - 1); i >= 0; --i) {
+			temp.append(digits[i]);
+		}
+        
+		return temp.toString();
 	}
 }

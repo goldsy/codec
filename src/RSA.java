@@ -17,7 +17,9 @@ public class RSA {
      * bits.
      */
 	public static String crypto(String message, String exponent, String modulus) {
-        String returnValue = "";
+        BigInt binMsg = new BigInt(message);
+        
+        String returnValue = binMsg.powMod(exponent, modulus).toString();
         
 		return returnValue;
 	}
