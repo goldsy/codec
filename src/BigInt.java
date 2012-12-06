@@ -531,12 +531,6 @@ public class BigInt {
      * This method returns the product of the multiplication.
      */
 	public BigInt multiply(BigInt rValue) {
-        // So the shifts don't go crazy, if lValue and rValue point to the same
-		// object make a copy.
-        if (this == rValue) {
-        	rValue = new BigInt(this);
-        }
-        
         // The accumulator needs to be the size of the sum of the size of
 		// the two numbers.
 		BigInt accumulator = new BigInt(size() + rValue.size());
@@ -574,6 +568,10 @@ public class BigInt {
      * This method returns the modulus of this BigInt.
      */
 	public BigInt mod(BigInt modulus) {
+        if (precomputed == null) {
+        	precomputeMods(modulus);
+        }
+        
         // The accumulator will never be larger than size of mod + 1.
         BigInt accumulator = new BigInt(modulus.size() + 1);
         
@@ -712,8 +710,13 @@ public class BigInt {
             // Call powMod() again.
         	BigInt rValue = powMod(exponent, modulus, accumulator);
             
+        	BigInt temp = new BigInt(rValue);
+            
         	// Square the resulting value, mod it and return the value.
-            return rValue.multiply(rValue).mod(modulus);
+            rValue = rValue.multiply(temp);
+            rValue.mod(modulus);
+            
+            return rValue;
         }
 	}
     
