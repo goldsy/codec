@@ -123,7 +123,9 @@ public class BigInt {
 //        }
         if (rValue.size() > size()) {
         	System.out.println("Possible buffer overflow. This BigInt must"
-        			+ " be larger in size than the value being added in.");
+        			+ " be larger in size than the value being added in."
+        			+ "[rValue.size(): " + rValue.size() + "][this.size(): "
+        			+ size());
             throw new RuntimeException();
         }
         
@@ -449,17 +451,23 @@ public class BigInt {
 			}
 		}
         
+        // The result will never be any more than the largest value.
+		BigInt result = new BigInt(Math.max(tempLValue.size(), rValue.size()));
+        
         // Check if that case doesn't exist.
 		if (maxIndex == -1) {
             // TODO: (goldsy) REMOVE AFTER TESTING.
             System.out.println("HOLD IT! WE GOT TWO NUMBERS THAT WILL RESULT IN A NEGATIVE OR ZERO (WHICH WE MIGHT HAVE).");
+            System.out.println("lValue: " + tempLValue.toString() + " Size(): " + tempLValue.size());
+            System.out.println("rValue: " + rValue.toString());
             
             // All bits must be considered.
 			maxIndex = tempLValue.size() - 1;
+            
+			// The values are the same.  Just return the result which is 
+			// initially zero.
+            return result;
 		}
-        
-        // The result will never be any more than the largest value.
-		BigInt result = new BigInt(Math.max(tempLValue.size(), rValue.size()));
         
 		// Now that we found that bit. Borrow from it... Set maxIndex bit to 0.
         tempLValue.setBit(maxIndex, 0);
@@ -515,7 +523,7 @@ public class BigInt {
         
         // TODO: (goldsy) Not sure if we need to but resize the result to the
         // 		exact size.
-        result.compact();
+        //result.compact();
         
         return result;
 	}
@@ -575,10 +583,16 @@ public class BigInt {
         // The accumulator will never be larger than size of mod + 1.
         BigInt accumulator = new BigInt(modulus.size() + 1);
         
+        // DEBUG
+        System.out.println("Size of accumulator: " + accumulator.size());
+        
         // Loop through all of the bits of this number.  Only add in the
         // remainders when the bit we are looking at is a 1.
         for (int index = 0; index < size(); ++index) {
         	if (getBit(index) == 1) {
+                // DEBUG
+                System.out.println("Precomputed value: " + precomputed[index].toString());
+                
         		accumulator.add(precomputed[index]);
                 
                 // Mod the result.
@@ -618,6 +632,9 @@ public class BigInt {
 
 			// Double it's value.
 			precomputed[index].shift();
+            
+            // Remove any preceding zeros.
+			precomputed[index].compact();
 
 			// DEBUG
 			//System.out.println("After shifting: " + precomputed[index].toString());
@@ -627,6 +644,9 @@ public class BigInt {
 				// DEBUG
 				//System.out.println("This value [" + toString() + "] is greater than modulus [" + modulus + "]");
 				precomputed[index] = precomputed[index].subtract(modulus);
+
+				// Remove any preceding zeros.
+				precomputed[index].compact();
 			}
 		}
 
@@ -680,7 +700,7 @@ public class BigInt {
             BigInt temp = mod(modulus);
             
         	// DEBUG
-        	System.out.println("Finished mod'ing exponent:" + exponent.toString() + " temp: " + temp.toString());
+        	System.out.println("Finished mod'ing exponent: " + exponent.toString() + " temp: " + temp.toString());
             
         	return temp;
         }
@@ -706,7 +726,7 @@ public class BigInt {
             lValue = lValue.mod(modulus);
             
         	// DEBUG
-        	System.out.println("Finished mod'ing odd exponent:" + exponent.toString() + " lValue: " + lValue.toString());
+        	System.out.println("Finished mod'ing odd exponent: " + exponent.toString() + " lValue: " + lValue.toString());
             
             return lValue;
         }
@@ -724,10 +744,10 @@ public class BigInt {
             
         	// Square the resulting value, mod it and return the value.
             rValue = rValue.multiply(temp);
-            rValue.mod(modulus);
+            rValue = rValue.mod(modulus);
             
         	// DEBUG
-        	System.out.println("Finished mod'ing even exponent:" + exponent.toString() + " rValue: " + rValue.toString());
+        	System.out.println("Finished mod'ing even exponent: " + exponent.toString() + " rValue: " + rValue.toString());
         	
             return rValue;
         }
@@ -746,6 +766,23 @@ public class BigInt {
 		// significant bit is initially at the zero index in the array.
 		return (digits.length - shifts);
 	}
+    
+    
+	/**
+	 * 
+	 * @return
+	 */
+    public int length() {
+        for (int index = (digits.length - 1); index > 0; --index) {
+        	if (digits[index] == 1) {
+        		return (index + 1 - shifts);
+        	}
+        }
+        
+        // If a 1 was not found in any other position return size of 1.
+        // It might be a zero or a one, but it doesn't matter.
+        return (1 - shifts);
+    }
     
 	
     /**

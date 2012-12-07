@@ -81,11 +81,19 @@ public class TestRSA {
         System.out.println();
         
         System.out.println("FULL CRYPTO TEST");
-        String myA = "1011";
-        String myB = "10";
-        String myC = "110";
+        String myA = "1011111";
+        //String myB = "1011";
+        //String b = "11111101010";
+        String myB = "11111101010";
+        String myC = "110101";
         
         System.out.println("  I say a^b mod c = " + RSA.crypto(myA,myB,myC));
+        
+        BigInteger  aBig1 = new BigInteger(myA,2);
+        BigInteger bBig1 = new BigInteger(myB,2);
+        BigInteger cBig1 = new BigInteger(myC,2);
+
+        System.out.println("  Java says a^b mod c = " + aBig1.modPow(bBig1,cBig1).toString(2));
         
         System.out.println("TEST THE FUNCTIONS");
         System.out.println("TEST THE FUNCTIONS");
