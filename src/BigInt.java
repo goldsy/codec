@@ -584,14 +584,14 @@ public class BigInt {
         BigInt accumulator = new BigInt(modulus.size() + 1);
         
         // DEBUG
-        System.out.println("Size of accumulator: " + accumulator.size());
+        //System.out.println("Size of accumulator: " + accumulator.size());
         
         // Loop through all of the bits of this number.  Only add in the
         // remainders when the bit we are looking at is a 1.
         for (int index = 0; index < size(); ++index) {
         	if (getBit(index) == 1) {
                 // DEBUG
-                System.out.println("Precomputed value: " + precomputed[index].toString());
+                //System.out.println("Precomputed value: " + precomputed[index].toString());
                 
         		accumulator.add(precomputed[index]);
                 
@@ -643,6 +643,7 @@ public class BigInt {
 			if (precomputed[index].isGreaterOrEquals(modulus)) {
 				// DEBUG
 				//System.out.println("This value [" + toString() + "] is greater than modulus [" + modulus + "]");
+                
 				precomputed[index] = precomputed[index].subtract(modulus);
 
 				// Remove any preceding zeros.
@@ -689,7 +690,7 @@ public class BigInt {
      */
 	private BigInt powMod(BigInt exponent, BigInt modulus, BigInt accumulator) {
         // DEBUG
-		System.out.println("Exponent value: " + exponent.toString() + " Size: " + exponent.size());
+		//System.out.println("Exponent value: " + exponent.toString() + " Size: " + exponent.size());
 		
         // Just make sure there are no leading zeros. This only costs a 
 		// function call if a resize isn't necessary.
@@ -700,7 +701,7 @@ public class BigInt {
             BigInt temp = mod(modulus);
             
         	// DEBUG
-        	System.out.println("Finished mod'ing exponent: " + exponent.toString() + " temp: " + temp.toString());
+        	//System.out.println("Finished mod'ing exponent: " + exponent.toString() + " temp: " + temp.toString());
             
         	return temp;
         }
@@ -726,7 +727,7 @@ public class BigInt {
             lValue = lValue.mod(modulus);
             
         	// DEBUG
-        	System.out.println("Finished mod'ing odd exponent: " + exponent.toString() + " lValue: " + lValue.toString());
+        	//System.out.println("Finished mod'ing odd exponent: " + exponent.toString() + " lValue: " + lValue.toString());
             
             return lValue;
         }
@@ -747,7 +748,7 @@ public class BigInt {
             rValue = rValue.mod(modulus);
             
         	// DEBUG
-        	System.out.println("Finished mod'ing even exponent: " + exponent.toString() + " rValue: " + rValue.toString());
+        	//System.out.println("Finished mod'ing even exponent: " + exponent.toString() + " rValue: " + rValue.toString());
         	
             return rValue;
         }

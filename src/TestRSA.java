@@ -104,7 +104,7 @@ public class TestRSA {
         System.out.println("TEST THE FUNCTIONS");
         System.out.println("TEST THE FUNCTIONS");
         // REMOVE AFTER TESTING.
-        System.exit(0);
+        //System.exit(0);
 
         System.out.println("COMPARE TO JAVA'S BIGINTEGER METHODS:");
 
