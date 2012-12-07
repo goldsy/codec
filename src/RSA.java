@@ -1,4 +1,10 @@
-
+/**
+ * This class is the RSA class. It doesn't do much except hide the creation
+ * of the BigInt classes from the caller and call the powMod function.
+ * 
+ * @author Jeff Goldsworthy
+ *
+ */
 public class RSA {
     /**
      * 

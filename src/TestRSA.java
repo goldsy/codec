@@ -14,97 +14,66 @@ public class TestRSA {
      * @param args
      */
     public static void main(String[] args) {
-    	// vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    	// vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    	// vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    	// vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-        // OLD STUFF PULLED FROM THE WEB.
-        // This is a general idea on how to get the bits from a string.
-        
-        //String s = "foo";
-        //byte[] bytes = s.getBytes();
-        //StringBuilder binary = new StringBuilder();
-
-        //for (byte b : bytes)
-        //{
-            //int val = b;
-
-            //for (int i = 0; i < 8; i++)
-            //{
-                //binary.append((val & 128) == 0 ? 0 : 1);
-                //val <<= 1;
-            //}
-
-            //binary.append(' ');
-        //}
-
-        //System.out.println("'" + s + "' to binary: " + binary);
-
-        // OLD STUFF PULLED FROM THE WEB.
-        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-        // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-        System.out.println("TEST THE FUNCTIONS");
-        System.out.println("TEST THE FUNCTIONS");
-        System.out.println("TEST THE FUNCTIONS");
-        System.out.println("TEST THE FUNCTIONS");
-        System.out.println("TEST THE FUNCTIONS");
-        System.out.println("TEST THE FUNCTIONS");
-        System.out.println("TEST THE FUNCTIONS");
-        System.out.println("TEST THE FUNCTIONS");
-        
-        BigInt bi1 = new BigInt("1011");
-        BigInt bi2 = new BigInt("110");
-        
-        System.out.println("Adding " + bi1.toString() + " + " + bi2.toString());
-        
-        BigInt result = bi1.basicAdd(bi2, null);
-        result.compact();
-        System.out.println(result.toString());
-        System.out.println();
-        
-        System.out.println("Multiplying " + bi1.toString() + " x " + bi2.toString());
-        result = bi1.multiply(bi2);
-        System.out.println(result.toString());
-        System.out.println();
-        
-        System.out.println("Subtracting " + bi1.toString() + " - " + bi2.toString());
-        result = bi1.subtract(bi2);
-        System.out.println(result.toString());
-        System.out.println();
-        
-        System.out.println("Mod " + bi1.toString() + " mod " + bi2.toString());
-        bi1.precomputeMods(bi2);
-        result = bi1.mod(bi2);
-        System.out.println(result.toString());
-        System.out.println();
-        
-        System.out.println("FULL CRYPTO TEST");
-        String myA = "1011111";
-        //String myB = "1011";
-        //String b = "11111101010";
-        String myB = "11111101010";
-        String myC = "110101";
-        
-        System.out.println("  I say a^b mod c = " + RSA.crypto(myA,myB,myC));
-        
-        BigInteger  aBig1 = new BigInteger(myA,2);
-        BigInteger bBig1 = new BigInteger(myB,2);
-        BigInteger cBig1 = new BigInteger(myC,2);
-
-        System.out.println("  Java says a^b mod c = " + aBig1.modPow(bBig1,cBig1).toString(2));
-        
-        System.out.println("TEST THE FUNCTIONS");
-        System.out.println("TEST THE FUNCTIONS");
-        System.out.println("TEST THE FUNCTIONS");
-        System.out.println("TEST THE FUNCTIONS");
-        System.out.println("TEST THE FUNCTIONS");
-        System.out.println("TEST THE FUNCTIONS");
-        System.out.println("TEST THE FUNCTIONS");
-        System.out.println("TEST THE FUNCTIONS");
-        // REMOVE AFTER TESTING.
-        //System.exit(0);
+//        System.out.println("MY UNIT TESTS");
+//        System.out.println("MY UNIT TESTS");
+//        System.out.println("MY UNIT TESTS");
+//        System.out.println("MY UNIT TESTS");
+//        System.out.println("MY UNIT TESTS");
+//        System.out.println("MY UNIT TESTS");
+//        System.out.println("MY UNIT TESTS");
+//        System.out.println("MY UNIT TESTS");
+//        
+//        BigInt bi1 = new BigInt("1011");
+//        BigInt bi2 = new BigInt("110");
+//        
+//        System.out.println("Adding " + bi1.toString() + " + " + bi2.toString());
+//        
+//        BigInt result = bi1.basicAdd(bi2, null);
+//        result.compact();
+//        System.out.println(result.toString());
+//        System.out.println();
+//        
+//        System.out.println("Multiplying " + bi1.toString() + " x " + bi2.toString());
+//        result = bi1.multiply(bi2);
+//        System.out.println(result.toString());
+//        System.out.println();
+//        
+//        System.out.println("Subtracting " + bi1.toString() + " - " + bi2.toString());
+//        result = bi1.subtract(bi2);
+//        System.out.println(result.toString());
+//        System.out.println();
+//        
+//        System.out.println("Mod " + bi1.toString() + " mod " + bi2.toString());
+//        bi1.precomputeMods(bi2);
+//        result = bi1.mod(bi2);
+//        System.out.println(result.toString());
+//        System.out.println();
+//        
+//        System.out.println("FULL CRYPTO TEST");
+//        String myA = "1011111";
+//        //String myB = "1011";
+//        //String b = "11111101010";
+//        String myB = "11111101010";
+//        String myC = "110101";
+//        
+//        System.out.println("  I say a^b mod c = " + RSA.crypto(myA,myB,myC));
+//        
+//        BigInteger  aBig1 = new BigInteger(myA,2);
+//        BigInteger bBig1 = new BigInteger(myB,2);
+//        BigInteger cBig1 = new BigInteger(myC,2);
+//
+//        System.out.println("  Java says a^b mod c = " + aBig1.modPow(bBig1,cBig1).toString(2));
+//        
+//        System.out.println("MY UNIT TESTS");
+//        System.out.println("MY UNIT TESTS");
+//        System.out.println("MY UNIT TESTS");
+//        System.out.println("MY UNIT TESTS");
+//        System.out.println("MY UNIT TESTS");
+//        System.out.println("MY UNIT TESTS");
+//        System.out.println("MY UNIT TESTS");
+//        System.out.println("MY UNIT TESTS");
+//        // REMOVE AFTER TESTING.
+//        //System.exit(0);
 
         System.out.println("COMPARE TO JAVA'S BIGINTEGER METHODS:");
 

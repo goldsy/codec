@@ -82,24 +82,6 @@ public class BigInt {
         	digits[index] = source.getBit(index);
         }
     }
-
-    
-    /**
-     * 
-     * @param power
-     * This is the power to raise this big integer by.
-     * 
-     * @param modBy
-     * This is the value to mod the result of the power of this big integer by.
-     * 
-     * @return
-     * This method returns the result of raising this big integer by the power
-     * and mod'ing it by the mod value.
-     */
-	public BigInt modPow(BigInt power, BigInt modBy) {
-		return null;
-	}
-    
 	
 	
     /**
@@ -118,9 +100,6 @@ public class BigInt {
      * This method returns a BigInt representing the sum of the two BigInts.
      */
 	public BigInt add(BigInt rValue) {
-//        if (result == null) {
-//        	result = new BigInt(Math.max(size(), rValue.size()) + 1);
-//        }
         if (rValue.size() > size()) {
         	System.out.println("Possible buffer overflow. This BigInt must"
         			+ " be larger in size than the value being added in."
@@ -140,7 +119,7 @@ public class BigInt {
 			// The lValue is always larger than the rValue and therefore will
 			// never have more than a carry bit added in.
 			if (i == size()) {
-				// Check the carry only.
+				// Check the carry only. Otherwise just leave the bit as is.
 				if (activeCarry) {
                     if (getBit(i) == 1) {
                         // Uh oh, we got a buffer overflow.
@@ -151,49 +130,7 @@ public class BigInt {
 					// Set the most significant bit to one.
 					setBit(i, 1);
 				}
-				else {
-// TODO: (goldsy) REMOVE AFTER TESTING.
-//					// The most significant bit was not needed.
-//					// Create a new result array with on less bit, copy the
-//					// result bits to the new array and set it in the resulting
-//					// big int.
-//					int[] temp = new int[result.size() - 1];
-//
-//					for (int index = 0; index < temp.length; ++index) {
-//						temp[index] = result.getBit(index);
-//					}
-//
-//					// Finally set the result to the temp.
-//					result.setArray(temp);
-				}
 			}
-            // TODO: (goldsy) REMOVE AFTER TESTING.  The lValue is always larger than the rValue.
-			// Check if the index has gone beyond the last bit of the lValue.
-//			else if (i > (size() - 1)) {
-//				if (rValue.getBit(i) == 1) {
-//					if (activeCarry) {
-//						// Leave the carry active.
-//						result.setBit(i, 0);
-//					}
-//					else {
-//						// Clear the carry active flag.
-//						activeCarry = false;
-//						result.setBit(i, 1);
-//					}
-//				}
-//				// The bit is a zero.
-//				else {
-//					if (activeCarry) {
-//						result.setBit(i, 1);
-//					}
-//					else {
-//						result.setBit(i, 0);
-//					}
-//
-//					// Always clear the carry active flag.
-//					activeCarry = false;
-//				}
-//			}
 			// Check if the index has gone beyond the last bit of the rValue.
 			else if (i > (rValue.size() - 1)) {
 				if (getBit(i) == 1) {
@@ -456,13 +393,10 @@ public class BigInt {
         
         // Check if that case doesn't exist.
 		if (maxIndex == -1) {
-            // TODO: (goldsy) REMOVE AFTER TESTING.
-            System.out.println("HOLD IT! WE GOT TWO NUMBERS THAT WILL RESULT IN A NEGATIVE OR ZERO (WHICH WE MIGHT HAVE).");
-            System.out.println("lValue: " + tempLValue.toString() + " Size(): " + tempLValue.size());
-            System.out.println("rValue: " + rValue.toString());
-            
-            // All bits must be considered.
-			maxIndex = tempLValue.size() - 1;
+            // DEBUG
+            //System.out.println("WE GOT TWO NUMBERS THAT WILL RESULT IN A ZERO.");
+            //System.out.println("lValue: " + tempLValue.toString() + " Size(): " + tempLValue.size());
+            //System.out.println("rValue: " + rValue.toString());
             
 			// The values are the same.  Just return the result which is 
 			// initially zero.
@@ -654,11 +588,10 @@ public class BigInt {
 		// DEBUG
 		//System.out.println("FINISHED PRECOMPUTING VALUES.");
 	}
-	
+    
 	
     /**
-     * Convenience function to create the accumulator for the modular 
-     * exponentiation function.
+     * Modular exponentiation function. this^exponent (mod modulus)
      * 
      * @param exponent
      * Power to raise this BigInt by.
@@ -671,24 +604,6 @@ public class BigInt {
      * exponent.
      */
 	public BigInt powMod(BigInt exponent, BigInt modulus) {
-        precomputeMods(modulus);
-        
-		BigInt accumulator = new BigInt(modulus.size());
-        
-        // This method returns a reference to the accumulator passed in the
-		// parameters.
-		return powMod(exponent, modulus, accumulator);
-	}
-    
-	
-    /**
-     * 
-     * @param exponent
-     * @param modulus
-     * @param accumulator
-     * @return
-     */
-	private BigInt powMod(BigInt exponent, BigInt modulus, BigInt accumulator) {
         // DEBUG
 		//System.out.println("Exponent value: " + exponent.toString() + " Size: " + exponent.size());
 		
@@ -713,7 +628,7 @@ public class BigInt {
             exponent.reduce();
             
             // Call powMod() again.
-        	BigInt rValue = powMod(exponent, modulus, accumulator);
+        	BigInt rValue = powMod(exponent, modulus);
             
         	BigInt temp = new BigInt(rValue);
             
@@ -739,7 +654,7 @@ public class BigInt {
             exponent.reduce();
             
             // Call powMod() again.
-        	BigInt rValue = powMod(exponent, modulus, accumulator);
+        	BigInt rValue = powMod(exponent, modulus);
             
         	BigInt temp = new BigInt(rValue);
             
@@ -767,23 +682,6 @@ public class BigInt {
 		// significant bit is initially at the zero index in the array.
 		return (digits.length - shifts);
 	}
-    
-    
-	/**
-	 * 
-	 * @return
-	 */
-    public int length() {
-        for (int index = (digits.length - 1); index > 0; --index) {
-        	if (digits[index] == 1) {
-        		return (index + 1 - shifts);
-        	}
-        }
-        
-        // If a 1 was not found in any other position return size of 1.
-        // It might be a zero or a one, but it doesn't matter.
-        return (1 - shifts);
-    }
     
 	
     /**
@@ -965,6 +863,13 @@ public class BigInt {
 	}
     
 	
+    /**
+     * This method overrides the base toString() method and displays the
+     * big int as a string.
+     * 
+     * @return
+     * This method returns a string representation of the big int.
+     */
 	public String toString() {
         StringBuilder temp = new StringBuilder(size());
         
@@ -972,6 +877,7 @@ public class BigInt {
 			temp.append(getBit(i));
 		}
         
-		return (temp.toString() /*+ " Shift Value: " + shifts + " Size: " + size()*/);
+        // DEBUG + " Shift Value: " + shifts + " Size: " + size()
+		return (temp.toString());
 	}
 }
