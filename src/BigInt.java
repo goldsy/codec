@@ -694,11 +694,21 @@ public class BigInt {
             // Call powMod() again.
         	BigInt rValue = powMod(exponent, modulus, accumulator);
             
-        	// Square the resulting value.
-            rValue = rValue.multiply(rValue);
+        	BigInt temp = new BigInt(rValue);
             
-            // Multiply the lValue and rValue together, mod() it and return the value.
-            return lValue.multiply(rValue).mod(modulus);
+        	// Square the resulting value.
+            rValue = rValue.multiply(temp);
+            
+            // Multiply the lValue and rValue together.
+            lValue = lValue.multiply(rValue);
+            
+            // mod() it and return the value.
+            lValue = lValue.mod(modulus);
+            
+        	// DEBUG
+        	System.out.println("Finished mod'ing odd exponent:" + exponent.toString() + " lValue: " + lValue.toString());
+            
+            return lValue;
         }
         else {
         	// The exponent is even.
@@ -716,6 +726,9 @@ public class BigInt {
             rValue = rValue.multiply(temp);
             rValue.mod(modulus);
             
+        	// DEBUG
+        	System.out.println("Finished mod'ing even exponent:" + exponent.toString() + " rValue: " + rValue.toString());
+        	
             return rValue;
         }
 	}
